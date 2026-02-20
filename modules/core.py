@@ -39,7 +39,6 @@ def parse_args() -> None:
     program.add_argument('--keep-audio', help='keep original audio', dest='keep_audio', action='store_true', default=True)
     program.add_argument('--keep-frames', help='keep temporary frames', dest='keep_frames', action='store_true', default=False)
     program.add_argument('--many-faces', help='process every face', dest='many_faces', action='store_true', default=False)
-    program.add_argument('--nsfw-filter', help='filter the NSFW image or video', dest='nsfw_filter', action='store_true', default=False)
     program.add_argument('--map-faces', help='map source target faces', dest='map_faces', action='store_true', default=False)
     program.add_argument('--mouth-mask', help='mask the mouth region', dest='mouth_mask', action='store_true', default=False)
     program.add_argument('--video-encoder', help='adjust output video encoder', dest='video_encoder', default='libx264', choices=['libx264', 'libx265', 'libvpx-vp9'])
@@ -70,7 +69,6 @@ def parse_args() -> None:
     modules.globals.keep_frames = args.keep_frames
     modules.globals.many_faces = args.many_faces
     modules.globals.mouth_mask = args.mouth_mask
-    modules.globals.nsfw_filter = args.nsfw_filter
     modules.globals.map_faces = args.map_faces
     modules.globals.video_encoder = args.video_encoder
     modules.globals.video_quality = args.video_quality
@@ -199,8 +197,6 @@ def start() -> None:
     
     # process image to image
     if has_image_extension(modules.globals.target_path):
-        if modules.globals.nsfw_filter and ui.check_and_ignore_nsfw(modules.globals.target_path, destroy):
-            return
         try:
             shutil.copy2(modules.globals.target_path, modules.globals.output_path)
         except Exception as e:
@@ -217,9 +213,6 @@ def start() -> None:
         return
     
     # process image to videos
-    if modules.globals.nsfw_filter and ui.check_and_ignore_nsfw(modules.globals.target_path, destroy):
-        return
-
     extraction_start = time.time()
     if not modules.globals.map_faces:
         update_status('Creating temp resources...')
